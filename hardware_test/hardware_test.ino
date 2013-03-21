@@ -82,7 +82,7 @@ void dmpDataReady() {
 
 void setup() {
   Serial.begin(9600);
-  //while (!Serial) ;
+  //while (!Serial) ; //uncomment this line for serial debugging.. if you dont care leave it commented out
   tests();
 }
 
@@ -94,14 +94,15 @@ void tests() {
   Serial.println(F("\tTESTS\t"));  
   Serial.print(F("Gyroscope: \t"));
   gyroscope();
-
   Serial.print(F("bluetooth: \t"));
   bluetooth();
   delay(3000);
   Serial.print(F("motor 1: \t"));
   motor1();
+  
+  /* this motor 2 is broken/not working - try replacing the mosfet */
   Serial.print(F("motor 2: \t"));
-  motor2();
+  motor2(); 
   Serial.print(F("motor 3: \t"));
   motor3();
   Serial.print(F("motor 4: \t"));
@@ -109,15 +110,10 @@ void tests() {
 }
 
 void gyroscope() {
-  
-  /* mpu6050 */
-  
+  /* mpu6050 */  
    Wire.begin();
-    mpu.initialize();
+   mpu.initialize();
    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
-
-
-
 }
 
 
@@ -127,7 +123,6 @@ void bluetooth() {
 }
 
 void motor1() {
-  /* start/stop */
   int led = 9;
   analogWrite(led, 5);
   delay(2000);
@@ -135,17 +130,15 @@ void motor1() {
   analogWrite(led, 0);
 }
 void motor2() {
-  /* start/stop */
   /* broken */
   int led = 10;
   analogWrite(led, 10);
   delay(2000);
   Serial.println(F("Works"));
- // analogWrite(led, 0);
+  analogWrite(led, 0);
 }
 
 void motor3() {
-  /* start/stop */
   int led = 11;
   analogWrite(led, 5);
   delay(2000);
@@ -154,7 +147,6 @@ void motor3() {
 }
 
 void motor4() {
-  /* start/stop */
   int led = 6;
   analogWrite(led, 5);
   delay(2000);
