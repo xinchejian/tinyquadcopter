@@ -1,7 +1,9 @@
 #include "Wire.h"
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
+#include <Adafruit_BMP085.h> // barometer
 MPU6050 mpu;
+Adafruit_BMP085 bmp;
 
 
 
@@ -63,7 +65,7 @@ float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 // packet structure for InvenSense teapot demo
-uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
+//uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
 
 
 
@@ -77,12 +79,10 @@ void dmpDataReady() {
 }
 
 
-
-
-
 void setup() {
   Serial.begin(9600);
-  //while (!Serial) ; //uncomment this line for serial debugging.. if you dont care leave it commented out
+  while (!Serial) {}; //uncomment this line for serial debugging.. if you dont care leave it commented out
+  
   tests();
 }
 
@@ -94,6 +94,8 @@ void tests() {
   Serial.println(F("\tTESTS\t"));  
   Serial.print(F("Gyroscope: \t"));
   gyroscope();
+  Serial.print(F("Testing Barometer: \t"));
+  barometer();
   Serial.print(F("bluetooth: \t"));
   bluetooth();
   delay(3000);
@@ -116,7 +118,16 @@ void gyroscope() {
    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 }
 
-
+void barometer() {
+  /*BMP085*/
+ if (!bmp.begin()) {
+    Serial.println(F("Could not find a valid BMP085 sensor, check wiring!"));
+  } else {
+    Serial.print("Altitude = ");
+    Serial.print(bmp.readAltitude());
+    Serial.println(" meters");
+  }
+}
 void bluetooth() {
   /* comms */
   (1==2) ? Serial.println(F("Works")) : Serial.println(F("Failed"));
@@ -124,7 +135,7 @@ void bluetooth() {
 
 void motor1() {
   int led = 9;
-  analogWrite(led, 5);
+  analogWrite(led, 50);
   delay(2000);
   Serial.println(F("Works"));
   analogWrite(led, 0);
@@ -132,7 +143,7 @@ void motor1() {
 void motor2() {
   /* broken */
   int led = 10;
-  analogWrite(led, 10);
+  analogWrite(led, 50);
   delay(2000);
   Serial.println(F("Works"));
   analogWrite(led, 0);
@@ -140,7 +151,7 @@ void motor2() {
 
 void motor3() {
   int led = 11;
-  analogWrite(led, 5);
+  analogWrite(led, 50);
   delay(2000);
   Serial.println(F("Works"));
   analogWrite(led, 0);
@@ -148,7 +159,7 @@ void motor3() {
 
 void motor4() {
   int led = 6;
-  analogWrite(led, 5);
+  analogWrite(led, 50);
   delay(2000);
   Serial.println(F("Works"));
   analogWrite(led, 0);
