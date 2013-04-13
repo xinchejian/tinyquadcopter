@@ -81,6 +81,7 @@ void dmpDataReady() {
 
 void setup() {
   Serial.begin(9600);
+  Serial1.begin(9600); //this is ONLY needed for Leonardo! to connect to the Bluetooth module 
   while (!Serial) {}; //uncomment this line for serial debugging.. if you dont care leave it commented out
   
   tests();
@@ -130,7 +131,8 @@ void barometer() {
 }
 void bluetooth() {
   /* comms */
-  (1==2) ? Serial.println(F("Works")) : Serial.println(F("Failed"));
+  
+  (Serial1) ? Serial.println(F("Works")) : Serial.println(F("Failed"));
 }
 
 void motor1() {
