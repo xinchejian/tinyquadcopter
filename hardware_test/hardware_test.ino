@@ -5,44 +5,12 @@
 MPU6050 mpu;
 Adafruit_BMP085 bmp;
 
+#define DEBUG_SERIAL //endable this for debugging
 
-
-// uncomment "OUTPUT_READABLE_QUATERNION" if you want to see the actual
-// quaternion components in a [w, x, y, z] format (not best for parsing
-// on a remote host such as Processing or something though)
-//#define OUTPUT_READABLE_QUATERNION
-
-// uncomment "OUTPUT_READABLE_EULER" if you want to see Euler angles
-// (in degrees) calculated from the quaternions coming from the FIFO.
-// Note that Euler angles suffer from gimbal lock (for more info, see
-// http://en.wikipedia.org/wiki/Gimbal_lock)
-//#define OUTPUT_READABLE_EULER
-
-// uncomment "OUTPUT_READABLE_YAWPITCHROLL" if you want to see the yaw/
-// pitch/roll angles (in degrees) calculated from the quaternions coming
-// from the FIFO. Note this also requires gravity vector calculations.
-// Also note that yaw/pitch/roll angles suffer from gimbal lock (for
-// more info, see: http://en.wikipedia.org/wiki/Gimbal_lock)
-//#define OUTPUT_READABLE_YAWPITCHROLL
-
-// uncomment "OUTPUT_READABLE_REALACCEL" if you want to see acceleration
-// components with gravity removed. This acceleration reference frame is
-// not compensated for orientation, so +X is always +X according to the
-// sensor, just without the effects of gravity. If you want acceleration
-// compensated for orientation, us OUTPUT_READABLE_WORLDACCEL instead.
 #define OUTPUT_READABLE_REALACCEL
 
-// uncomment "OUTPUT_READABLE_WORLDACCEL" if you want to see acceleration
-// components with gravity removed and adjusted for the world frame of
-// reference (yaw is relative to initial orientation, since no magnetometer
-// is present in this case). Could be quite handy in some cases.
+
 #define OUTPUT_READABLE_WORLDACCEL
-
-// uncomment "OUTPUT_TEAPOT" if you want output that matches the
-// format used for the InvenSense teapot demo
-//#define OUTPUT_TEAPOT
-
-
 
 #define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 bool blinkState = false;
@@ -64,9 +32,7 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
-// packet structure for InvenSense teapot demo
-//uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
-
+int incomingByte = 0; 
 
 
 // ================================================================
@@ -75,14 +41,18 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 void dmpDataReady() {
-    mpuInterrupt = true;
+  mpuInterrupt = true;
 }
 
 
 void setup() {
-  Serial.begin(9600);
+
   Serial1.begin(9600); //this is ONLY needed for Leonardo! to connect to the Bluetooth module 
+  #ifdef DEBUG_SERIAL
+  Serial.begin(9600);
   while (!Serial) {}; //uncomment this line for serial debugging.. if you dont care leave it commented out
+  #endif
+  
   
   tests();
 }
@@ -91,24 +61,50 @@ void loop() {
 
 }
 
+void serialRead() {
+  #ifdef DEBUG_SERIAL
+  if (Serial1.available() > 0) {
+    // read the incoming byte:
+    incomingByte = Serial.read();
+  
+    // say what you got:
+    Serial.print("received: ");
+    Serial.println(incomingByte, DEC);
+  }
+  #endif
+}
 void tests() {
+  #ifdef DEBUG_SERIAL
   Serial.println(F("\tTESTS\t"));  
   Serial.print(F("Gyroscope: \t"));
+  #endif
   gyroscope();
+  #ifdef DEBUG_SERIAL
   Serial.print(F("Testing Barometer: \t"));
+  #endif
   barometer();
+  #ifdef DEBUG_SERIAL
   Serial.print(F("bluetooth: \t"));
+  #endif
   bluetooth();
   delay(3000);
+  #ifdef DEBUG_SERIAL
   Serial.print(F("motor 1: \t"));
+  #endif
   motor1();
   
   /* this motor 2 is broken/not working - try replacing the mosfet */
+  #ifdef DEBUG_SERIAL
   Serial.print(F("motor 2: \t"));
+  #endif
   motor2(); 
+  #ifdef DEBUG_SERIAL
   Serial.print(F("motor 3: \t"));
+  #endif
   motor3();
+  #ifdef DEBUG_SERIAL
   Serial.print(F("motor 4: \t"));
+  #endif
   motor4();
 }
 
@@ -116,7 +112,9 @@ void gyroscope() {
   /* mpu6050 */  
    Wire.begin();
    mpu.initialize();
+   #ifdef DEBUG_SERIAL
    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+   #endif
 }
 
 void rename_bluetooth() {
@@ -125,17 +123,28 @@ void rename_bluetooth() {
   pinMode(12, OUTPUT);
   digitalWrite(12, HIGH);
   delay(100);
+  serialRead();
+  #ifdef DEBUG_SERIAL
   Serial.print(F("Setting Name: "));
+  #endif
   Serial1.println("AT+NAME=Quadrino");
+  serialRead();
+  #ifdef DEBUG_SERIAL
   Serial.println("Quadrino");
+  #endif
   delay(1000);
   digitalWrite(12,LOW);
   delay(100);
   digitalWrite(12,HIGH);
   delay(100);
+  #ifdef DEBUG_SERIAL
   Serial.print(F("Setting password: "));
+  #endif
   Serial1.println("AT+PSWD=6969");
+  #ifdef DEBUG_SERIAL
+  serialRead();
   Serial.println("6969");
+  #endif
   delay(1000);
   pinMode(12, INPUT);
   digitalWrite(12, LOW);
@@ -145,17 +154,30 @@ void rename_bluetooth() {
 void barometer() {
   /*BMP085*/
  if (!bmp.begin()) {
+   #ifdef DEBUG_SERIAL
     Serial.println(F("Could not find a valid BMP085 sensor, check wiring!"));
+    #endif
   } else {
+    #ifdef DEBUG_SERIAL
     Serial.print("Altitude = ");
     Serial.print(bmp.readAltitude());
     Serial.println(" meters");
+    #endif
   }
 }
 void bluetooth() {
   /* comms */
   
-  (Serial1) ? Serial.println(F("Works")) : Serial.println(F("Failed"));
+  if (Serial1) { 
+    serialRead();
+    #ifdef DEBUG_SERIAL
+    Serial.println(F("Works")) ;
+    #endif
+  }else {
+    #ifdef DEBUG_SERIAL
+    Serial.println(F("Failed"));
+    #endif
+  }
   rename_bluetooth();
 }
 
@@ -163,7 +185,9 @@ void motor1() {
   int led = 9;
   analogWrite(led, 50);
   delay(2000);
+  #ifdef DEBUG_SERIAL
   Serial.println(F("Works"));
+  #endif
   analogWrite(led, 0);
 }
 void motor2() {
@@ -171,7 +195,9 @@ void motor2() {
   int led = 10;
   analogWrite(led, 50);
   delay(2000);
+  #ifdef DEBUG_SERIAL
   Serial.println(F("Works"));
+  #endif
   analogWrite(led, 0);
 }
 
@@ -179,7 +205,9 @@ void motor3() {
   int led = 11;
   analogWrite(led, 50);
   delay(2000);
+  #ifdef DEBUG_SERIAL
   Serial.println(F("Works"));
+  #endif
   analogWrite(led, 0);
 }
 
@@ -187,7 +215,9 @@ void motor4() {
   int led = 6;
   analogWrite(led, 50);
   delay(2000);
+  #ifdef DEBUG_SERIAL
   Serial.println(F("Works"));
+  #endif
   analogWrite(led, 0);
 }
 
