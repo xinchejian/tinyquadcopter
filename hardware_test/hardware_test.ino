@@ -50,7 +50,10 @@ void setup() {
   Serial1.begin(9600); //this is ONLY needed for Leonardo! to connect to the Bluetooth module 
   #ifdef DEBUG_SERIAL
   Serial.begin(9600);
+  
   while (!Serial) {}; //uncomment this line for serial debugging.. if you dont care leave it commented out
+  delay(1000);
+  Serial.println(F("Serial data coming;;"));
   #endif
   
   
@@ -62,8 +65,8 @@ void loop() {
 }
 
 void serialRead() {
-  #ifdef DEBUG_SERIAL
-  if (Serial1.available() > 0) {
+  //#ifdef DEBUG_SERIAL
+  while (Serial1.available()) {
     // read the incoming byte:
     incomingByte = Serial.read();
   
@@ -71,7 +74,7 @@ void serialRead() {
     Serial.print("received: ");
     Serial.println(incomingByte, DEC);
   }
-  #endif
+  //#endif
 }
 void tests() {
   #ifdef DEBUG_SERIAL
