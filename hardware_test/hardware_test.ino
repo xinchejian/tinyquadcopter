@@ -119,6 +119,29 @@ void gyroscope() {
    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 }
 
+void rename_bluetooth() {
+  //rename bluetooth and set password to 6969
+
+  pinMode(12, OUTPUT);
+  digitalWrite(12, HIGH);
+  delay(100);
+  Serial.print(F("Setting Name: "));
+  Serial1.println("AT+NAME=Quadrino");
+  Serial.println("Quadrino");
+  delay(1000);
+  digitalWrite(12,LOW);
+  delay(100);
+  digitalWrite(12,HIGH);
+  delay(100);
+  Serial.print(F("Setting password: "));
+  Serial1.println("AT+PSWD=6969");
+  Serial.println("6969");
+  delay(1000);
+  pinMode(12, INPUT);
+  digitalWrite(12, LOW);
+  
+}
+
 void barometer() {
   /*BMP085*/
  if (!bmp.begin()) {
@@ -133,6 +156,7 @@ void bluetooth() {
   /* comms */
   
   (Serial1) ? Serial.println(F("Works")) : Serial.println(F("Failed"));
+  rename_bluetooth();
 }
 
 void motor1() {
