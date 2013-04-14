@@ -51,7 +51,9 @@ void setup() {
   #ifdef DEBUG_SERIAL
   Serial.begin(9600);
   
-  while (!Serial) {}; //uncomment this line for serial debugging.. if you dont care leave it commented out
+  while (!Serial) {
+    //a little wait
+  } 
   delay(1000);
   Serial.println(F("Serial data coming;;"));
   #endif
